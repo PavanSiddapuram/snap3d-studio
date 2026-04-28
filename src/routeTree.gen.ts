@@ -9,38 +9,172 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsLithophaneRouteImport } from './routes/tools.lithophane'
+import { Route as ToolsEtsyProfitRouteImport } from './routes/tools.etsy-profit'
+import { Route as GenerateTextRouteImport } from './routes/generate.text'
+import { Route as GenerateImageRouteImport } from './routes/generate.image'
 
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsLithophaneRoute = ToolsLithophaneRouteImport.update({
+  id: '/lithophane',
+  path: '/lithophane',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsEtsyProfitRoute = ToolsEtsyProfitRouteImport.update({
+  id: '/etsy-profit',
+  path: '/etsy-profit',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const GenerateTextRoute = GenerateTextRouteImport.update({
+  id: '/generate/text',
+  path: '/generate/text',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GenerateImageRoute = GenerateImageRouteImport.update({
+  id: '/generate/image',
+  path: '/generate/image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/pricing': typeof PricingRoute
+  '/settings': typeof SettingsRoute
+  '/tools': typeof ToolsRouteWithChildren
+  '/generate/image': typeof GenerateImageRoute
+  '/generate/text': typeof GenerateTextRoute
+  '/tools/etsy-profit': typeof ToolsEtsyProfitRoute
+  '/tools/lithophane': typeof ToolsLithophaneRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/pricing': typeof PricingRoute
+  '/settings': typeof SettingsRoute
+  '/tools': typeof ToolsRouteWithChildren
+  '/generate/image': typeof GenerateImageRoute
+  '/generate/text': typeof GenerateTextRoute
+  '/tools/etsy-profit': typeof ToolsEtsyProfitRoute
+  '/tools/lithophane': typeof ToolsLithophaneRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/pricing': typeof PricingRoute
+  '/settings': typeof SettingsRoute
+  '/tools': typeof ToolsRouteWithChildren
+  '/generate/image': typeof GenerateImageRoute
+  '/generate/text': typeof GenerateTextRoute
+  '/tools/etsy-profit': typeof ToolsEtsyProfitRoute
+  '/tools/lithophane': typeof ToolsLithophaneRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/pricing'
+    | '/settings'
+    | '/tools'
+    | '/generate/image'
+    | '/generate/text'
+    | '/tools/etsy-profit'
+    | '/tools/lithophane'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/pricing'
+    | '/settings'
+    | '/tools'
+    | '/generate/image'
+    | '/generate/text'
+    | '/tools/etsy-profit'
+    | '/tools/lithophane'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/pricing'
+    | '/settings'
+    | '/tools'
+    | '/generate/image'
+    | '/generate/text'
+    | '/tools/etsy-profit'
+    | '/tools/lithophane'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  PricingRoute: typeof PricingRoute
+  SettingsRoute: typeof SettingsRoute
+  ToolsRoute: typeof ToolsRouteWithChildren
+  GenerateImageRoute: typeof GenerateImageRoute
+  GenerateTextRoute: typeof GenerateTextRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,21 +182,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/lithophane': {
+      id: '/tools/lithophane'
+      path: '/lithophane'
+      fullPath: '/tools/lithophane'
+      preLoaderRoute: typeof ToolsLithophaneRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/etsy-profit': {
+      id: '/tools/etsy-profit'
+      path: '/etsy-profit'
+      fullPath: '/tools/etsy-profit'
+      preLoaderRoute: typeof ToolsEtsyProfitRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/generate/text': {
+      id: '/generate/text'
+      path: '/generate/text'
+      fullPath: '/generate/text'
+      preLoaderRoute: typeof GenerateTextRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/generate/image': {
+      id: '/generate/image'
+      path: '/generate/image'
+      fullPath: '/generate/image'
+      preLoaderRoute: typeof GenerateImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface ToolsRouteChildren {
+  ToolsEtsyProfitRoute: typeof ToolsEtsyProfitRoute
+  ToolsLithophaneRoute: typeof ToolsLithophaneRoute
+}
+
+const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsEtsyProfitRoute: ToolsEtsyProfitRoute,
+  ToolsLithophaneRoute: ToolsLithophaneRoute,
+}
+
+const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  PricingRoute: PricingRoute,
+  SettingsRoute: SettingsRoute,
+  ToolsRoute: ToolsRouteWithChildren,
+  GenerateImageRoute: GenerateImageRoute,
+  GenerateTextRoute: GenerateTextRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
