@@ -41,76 +41,109 @@ function Dashboard() {
   const jobs = JOBS.filter((j) => filter === "All" || j.type === filter);
 
   return (
-    <div className="mx-auto max-w-7xl px-5 lg:px-8 py-10">
-      <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)]">
+    <PageShell>
+    <div className="mx-auto max-w-7xl px-5 lg:px-8 py-12">
+      <div className="grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">
         {/* Sidebar */}
         <aside className="hidden lg:flex flex-col gap-1 sticky top-24 self-start">
+          <p className="px-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-2">Workspace</p>
           <SidebarLink to="/generate/image" label="Generate" />
           <SidebarLink to="/tools" label="Tools" />
           <SidebarLink to="/dashboard" label="Dashboard" active />
           <SidebarLink to="/settings" label="Settings" />
-          <div className="mt-8 rounded-xl border border-border-subtle bg-card p-4">
-            <div className="text-xs text-muted-foreground">Credits</div>
-            <div className="mt-1 text-2xl font-semibold tabular-nums">8</div>
-            <Link
-              to="/pricing"
-              className="mt-3 block text-center text-xs px-3 py-2 rounded-md bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
-            >
-              Upgrade
-            </Link>
+          <div className="mt-8 relative rounded-2xl border border-border-subtle bg-card p-5 overflow-hidden noise">
+            <div
+              aria-hidden
+              className="absolute inset-0 opacity-60"
+              style={{
+                background:
+                  "radial-gradient(80% 60% at 0% 0%, oklch(0.55 0.22 277 / 0.18), transparent 60%)",
+              }}
+            />
+            <div className="relative">
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Credits</div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="text-3xl font-semibold tabular-nums">8</span>
+                <span className="text-xs text-muted-foreground">/ 10</span>
+              </div>
+              <div className="mt-3 h-1 rounded-full bg-elevated overflow-hidden">
+                <div className="h-full rounded-full bg-accent" style={{ width: "80%" }} />
+              </div>
+              <Link
+                to="/pricing"
+                className="mt-4 block text-center text-xs px-3 py-2 rounded-full bg-foreground text-background hover:opacity-90 transition-opacity font-medium"
+              >
+                Upgrade plan
+              </Link>
+            </div>
           </div>
         </aside>
 
         <div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight">Your Generations</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-accent font-medium">Library</p>
+              <h1 className="mt-2 text-4xl font-semibold tracking-[-0.025em]">Your Generations</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
                 All models you've created with Snap3D.
               </p>
             </div>
             <Link
               to="/generate/image"
-              className="inline-flex items-center gap-1.5 px-4 h-10 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:bg-accent-hover transition-colors active:scale-95"
+              className="inline-flex items-center gap-1.5 px-4 h-10 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity active:scale-[0.97]"
             >
-              <Plus className="size-4" /> New
+              <Plus className="size-4" /> New generation
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <Stat label="Models created" value="42" />
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <Stat label="Models created" value="42" hint="+12 this month" />
             <Stat label="Credits remaining" value="8" icon={<Coins className="size-4 text-warning" />} />
-            <Stat label="Plan" value="Free" hint="Upgrade for more" />
+            <Stat label="Current plan" value="Free" hint="Upgrade for more" />
           </div>
 
-          <div className="mt-8 -mx-5 lg:mx-0 px-5 lg:px-0 overflow-x-auto">
-            <div className="flex gap-1 min-w-max border-b border-border-subtle">
-              {FILTERS.map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={cn(
-                    "px-4 py-2.5 text-sm transition-colors relative",
-                    filter === f ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {f}
-                  {filter === f && (
-                    <span className="absolute inset-x-3 -bottom-px h-0.5 bg-accent rounded-full" />
-                  )}
-                </button>
-              ))}
-            </div>
+          <div className="mt-10 -mx-5 lg:mx-0 px-5 lg:px-0 overflow-x-auto">
+            <LayoutGroup id="dash-tabs">
+              <div className="inline-flex gap-1 p-1 rounded-full bg-card border border-border-subtle">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={cn(
+                      "relative px-4 py-1.5 text-sm rounded-full transition-colors whitespace-nowrap",
+                      filter === f ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {filter === f && (
+                      <motion.span
+                        layoutId="dash-active"
+                        transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                        className="absolute inset-0 rounded-full bg-elevated border border-border-subtle"
+                      />
+                    )}
+                    <span className="relative">{f}</span>
+                  </button>
+                ))}
+              </div>
+            </LayoutGroup>
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {jobs.map((j) => (
-              <JobCard key={j.id} job={j} />
+            {jobs.map((j, i) => (
+              <motion.div
+                key={j.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <JobCard job={j} />
+              </motion.div>
             ))}
           </div>
         </div>
       </div>
     </div>
+    </PageShell>
   );
 }
 
