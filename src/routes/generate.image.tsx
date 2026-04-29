@@ -130,7 +130,7 @@ function ImageGenerate() {
             onClick={generate}
             disabled={status === "loading"}
             className={cn(
-              "w-full h-12 rounded-xl bg-accent text-accent-foreground font-medium hover:bg-accent-hover transition-colors active:scale-[0.98] inline-flex items-center justify-center gap-2 shadow-[0_8px_30px_-8px_var(--accent)] disabled:opacity-70",
+              "w-full h-12 rounded-full bg-foreground text-background font-medium hover:opacity-90 transition-opacity active:scale-[0.98] inline-flex items-center justify-center gap-2 shadow-[0_10px_40px_-10px_rgba(255,255,255,0.25)] disabled:opacity-70",
               status === "loading" && "animate-pulse-glow",
             )}
           >
