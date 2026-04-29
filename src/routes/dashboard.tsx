@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { motion, LayoutGroup } from "framer-motion";
 import { Box, Download, Coins, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PageShell } from "@/components/PageShell";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
