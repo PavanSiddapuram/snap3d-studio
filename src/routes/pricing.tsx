@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Check, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageShell } from "@/components/PageShell";
@@ -101,53 +102,72 @@ function Pricing() {
   const [annual, setAnnual] = useState(false);
   return (
     <PageShell>
-      <div className="mx-auto max-w-7xl px-5 lg:px-8 py-16 lg:py-24">
+      <div className="relative mx-auto max-w-7xl px-5 lg:px-8 py-20 lg:py-28">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60vh]"
+          style={{
+            background:
+              "radial-gradient(50% 50% at 50% 0%, oklch(0.55 0.22 277 / 0.12), transparent 70%)",
+          }}
+        />
         <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-balance">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-accent font-medium">Pricing</p>
+          <h1 className="mt-4 text-5xl sm:text-6xl font-semibold tracking-[-0.035em] text-balance leading-[1.02]">
             Simple pricing for makers.
           </h1>
-          <p className="mt-4 text-muted-foreground">
+          <p className="mt-5 text-muted-foreground text-[15px]">
             Start free. Upgrade when you outgrow it. No hidden fees.
           </p>
 
-          <div className="mt-8 inline-flex items-center gap-3 p-1 rounded-full bg-card border border-border-subtle">
-            <button
-              onClick={() => setAnnual(false)}
-              className={cn(
-                "px-4 py-1.5 text-sm rounded-full transition-colors",
-                !annual ? "bg-elevated text-foreground" : "text-muted-foreground",
-              )}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setAnnual(true)}
-              className={cn(
-                "px-4 py-1.5 text-sm rounded-full transition-colors inline-flex items-center gap-2",
-                annual ? "bg-elevated text-foreground" : "text-muted-foreground",
-              )}
-            >
-              Annual
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success border border-success/30">
-                Save 20%
-              </span>
-            </button>
+          <div className="mt-9 inline-flex items-center gap-1 p-1 rounded-full bg-card border border-border-subtle relative">
+            {(["Monthly", "Annual"] as const).map((label, i) => {
+              const isAnnual = i === 1;
+              const active = annual === isAnnual;
+              return (
+                <button
+                  key={label}
+                  onClick={() => setAnnual(isAnnual)}
+                  className={cn(
+                    "relative px-5 py-1.5 text-sm rounded-full transition-colors inline-flex items-center gap-2 z-10",
+                    active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="price-toggle"
+                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                      className="absolute inset-0 rounded-full bg-elevated border border-border-subtle"
+                    />
+                  )}
+                  <span className="relative">{label}</span>
+                  {isAnnual && (
+                    <span className="relative text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success border border-success/30">
+                      −20%
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
-          {PLANS.map((p) => (
-            <div
+        <div className="mt-14 grid gap-5 lg:grid-cols-3">
+          {PLANS.map((p, i) => (
+            <motion.div
               key={p.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className={cn(
-                "relative rounded-2xl border bg-card p-7 flex flex-col",
+                "relative rounded-3xl border bg-card p-7 flex flex-col noise",
                 p.highlight
-                  ? "border-accent shadow-[0_0_0_1px_var(--accent),0_20px_60px_-20px_var(--accent-glow)] lg:scale-[1.02]"
+                  ? "border-accent/60 shadow-[0_0_0_1px_var(--accent),0_30px_80px_-30px_var(--accent-glow)] lg:scale-[1.03]"
                   : "border-border-subtle",
               )}
             >
               {p.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[11px] uppercase tracking-wider rounded-full bg-accent text-accent-foreground font-medium">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-[10px] uppercase tracking-[0.15em] rounded-full bg-accent text-accent-foreground font-semibold shadow-[0_8px_30px_-8px_var(--accent)]">
                   Most Popular
                 </span>
               )}
@@ -155,23 +175,23 @@ function Pricing() {
               <p className="mt-1 text-sm text-muted-foreground">{p.blurb}</p>
 
               <div className="mt-6 flex items-baseline gap-1.5">
-                <span className="text-4xl font-semibold tracking-tight">
+                <span className="text-5xl font-semibold tracking-[-0.03em] tabular-nums">
                   ₹{annual ? Math.round(p.annual / 12) : p.monthly}
                 </span>
                 <span className="text-sm text-muted-foreground">/month</span>
               </div>
-              {annual && p.annual > 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Billed ₹{p.annual.toLocaleString("en-IN")} yearly
-                </p>
-              )}
+              <p className="mt-1 text-xs text-muted-foreground h-4">
+                {annual && p.annual > 0
+                  ? `Billed ₹${p.annual.toLocaleString("en-IN")} yearly`
+                  : ""}
+              </p>
 
               <Link
                 to={p.href}
                 className={cn(
-                  "mt-6 inline-flex items-center justify-center h-11 rounded-xl text-sm font-medium transition-colors active:scale-95",
+                  "mt-6 inline-flex items-center justify-center h-11 rounded-full text-sm font-medium transition-all active:scale-[0.97]",
                   p.highlight
-                    ? "bg-accent text-accent-foreground hover:bg-accent-hover"
+                    ? "bg-accent text-accent-foreground hover:bg-accent-hover shadow-[0_8px_30px_-8px_var(--accent)]"
                     : "border border-border bg-card hover:bg-elevated",
                 )}
               >
@@ -182,25 +202,32 @@ function Pricing() {
                 {p.features.map((f) => (
                   <li key={f.label} className="flex items-start gap-2.5">
                     {f.included ? (
-                      <Check className="size-4 text-success mt-0.5 shrink-0" />
+                      <span className="size-4 rounded-full bg-accent/15 text-accent flex items-center justify-center mt-0.5 shrink-0">
+                        <Check className="size-2.5" strokeWidth={3} />
+                      </span>
                     ) : (
-                      <Minus className="size-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <span className="size-4 rounded-full border border-border-subtle flex items-center justify-center mt-0.5 shrink-0">
+                        <Minus className="size-2.5 text-muted-foreground" />
+                      </span>
                     )}
-                    <span className={f.included ? "" : "text-muted-foreground line-through"}>
+                    <span className={f.included ? "" : "text-muted-foreground/60"}>
                       {f.label}
                     </span>
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div className="mt-16 max-w-3xl mx-auto">
-          <h2 className="text-2xl font-semibold tracking-tight text-center">
-            Frequently asked questions
-          </h2>
-          <div className="mt-8 divide-y divide-border-subtle border border-border-subtle rounded-2xl overflow-hidden bg-card">
+        <div className="mt-24 max-w-3xl mx-auto">
+          <div className="text-center">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-accent font-medium">FAQ</p>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-semibold tracking-[-0.025em]">
+              Frequently asked questions
+            </h2>
+          </div>
+          <div className="mt-10 divide-y divide-border-subtle border border-border-subtle rounded-3xl overflow-hidden bg-card noise">
             {FAQ.map((item, i) => (
               <FaqItem key={i} q={item.q} a={item.a} />
             ))}
@@ -216,20 +243,32 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   return (
     <button
       onClick={() => setOpen((v) => !v)}
-      className="w-full text-left px-6 py-5 hover:bg-elevated/50 transition-colors"
+      className="w-full text-left px-6 py-5 hover:bg-elevated/40 transition-colors"
     >
       <div className="flex items-center justify-between gap-4">
-        <span className="font-medium">{q}</span>
+        <span className="font-medium text-[15px]">{q}</span>
         <span
           className={cn(
-            "size-6 rounded-full border border-border-subtle flex items-center justify-center text-muted-foreground transition-transform",
-            open && "rotate-45",
+            "size-7 rounded-full border border-border-subtle flex items-center justify-center text-muted-foreground transition-transform shrink-0",
+            open && "rotate-45 bg-accent/10 text-accent border-accent/30",
           )}
         >
           +
         </span>
       </div>
-      {open && <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{a}</p>}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.p
+            initial={{ height: 0, opacity: 0, marginTop: 0 }}
+            animate={{ height: "auto", opacity: 1, marginTop: 12 }}
+            exit={{ height: 0, opacity: 0, marginTop: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="text-sm text-muted-foreground leading-relaxed overflow-hidden"
+          >
+            {a}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </button>
   );
 }

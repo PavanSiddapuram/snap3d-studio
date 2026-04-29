@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { motion, LayoutGroup } from "framer-motion";
 import {
   Search,
   ImageIcon,
@@ -21,8 +22,10 @@ import {
   Layers,
   Zap,
   Maximize,
+  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PageShell } from "@/components/PageShell";
 
 export const Route = createFileRoute("/tools")({
   head: () => ({
@@ -91,74 +94,102 @@ function ToolsIndex() {
   }, [query, cat]);
 
   return (
-    <div className="mx-auto max-w-7xl px-5 lg:px-8 py-12 lg:py-16">
+    <PageShell>
+    <div className="relative mx-auto max-w-7xl px-5 lg:px-8 py-16 lg:py-20">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40vh]"
+        style={{
+          background:
+            "radial-gradient(50% 50% at 50% 0%, oklch(0.55 0.22 277 / 0.08), transparent 70%)",
+        }}
+      />
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-            Free 3D Printing Tools
+          <p className="text-[11px] uppercase tracking-[0.2em] text-accent font-medium">Toolbox</p>
+          <h1 className="mt-3 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] text-balance">
+            Free tools for makers.
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            No account required. No credits needed. Just build.
+          <p className="mt-3 text-muted-foreground text-[15px]">
+            Twenty-plus utilities. No account, no credits — just build.
           </p>
         </div>
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search tools…"
-            className="w-full pl-10 pr-3 h-10 rounded-lg bg-card border border-border-subtle focus:outline-none focus:ring-2 focus:ring-accent/60 focus:border-accent text-sm placeholder:text-muted-foreground"
+            className="w-full pl-10 pr-3 h-11 rounded-full bg-card border border-border-subtle focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-all text-sm placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
-      <div className="mt-8 -mx-5 lg:mx-0 px-5 lg:px-0 overflow-x-auto">
-        <div className="flex gap-1 min-w-max border-b border-border-subtle">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={cn(
-                "px-4 py-2.5 text-sm transition-colors relative",
-                cat === c
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {c}
-              {cat === c && (
-                <span className="absolute inset-x-3 -bottom-px h-0.5 bg-accent rounded-full" />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((t) => (
-          <Link
-            key={t.name}
-            to={t.href}
-            className="group rounded-2xl border border-border-subtle bg-card p-5 glow-on-hover hover:border-accent/40"
-          >
-            <div className="flex items-start justify-between">
-              <div className="size-10 rounded-lg bg-elevated border border-border-subtle flex items-center justify-center group-hover:border-accent/40 transition-colors">
-                <t.icon className="size-5 text-muted-foreground group-hover:text-accent transition-colors" />
-              </div>
-              <span
+      <div className="mt-10 -mx-5 lg:mx-0 px-5 lg:px-0 overflow-x-auto">
+        <LayoutGroup id="tools-tabs">
+          <div className="inline-flex gap-1 p-1 rounded-full bg-card border border-border-subtle">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCat(c)}
                 className={cn(
-                  "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border font-medium",
-                  t.paid
-                    ? "text-accent border-accent/40 bg-accent/10"
-                    : "text-success border-success/40 bg-success/10",
+                  "relative px-4 py-1.5 text-sm rounded-full transition-colors whitespace-nowrap",
+                  cat === c ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {t.paid ? "Credits" : "Free"}
-              </span>
-            </div>
-            <h3 className="mt-5 text-base font-semibold">{t.name}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{t.desc}</p>
-          </Link>
+                {cat === c && (
+                  <motion.span
+                    layoutId="tool-cat-active"
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                    className="absolute inset-0 rounded-full bg-elevated border border-border-subtle"
+                  />
+                )}
+                <span className="relative">{c}</span>
+              </button>
+            ))}
+          </div>
+        </LayoutGroup>
+      </div>
+
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((t, i) => (
+          <motion.div
+            key={t.name}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: Math.min(i, 8) * 0.03, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Link
+              to={t.href}
+              className="group block relative overflow-hidden rounded-2xl border border-border-subtle bg-card p-5 transition-all hover:border-accent/40 hover:-translate-y-0.5 noise"
+            >
+              <div
+                aria-hidden
+                className="absolute -top-12 -right-12 size-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl"
+                style={{ background: "oklch(0.55 0.22 277 / 0.3)" }}
+              />
+              <div className="relative flex items-start justify-between">
+                <div className="size-11 rounded-xl bg-elevated border border-border-subtle flex items-center justify-center group-hover:border-accent/40 group-hover:bg-accent/10 transition-colors">
+                  <t.icon className="size-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                </div>
+                <span
+                  className={cn(
+                    "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border font-medium",
+                    t.paid
+                      ? "text-accent border-accent/40 bg-accent/10"
+                      : "text-success border-success/40 bg-success/10",
+                  )}
+                >
+                  {t.paid ? "Credits" : "Free"}
+                </span>
+              </div>
+              <h3 className="relative mt-5 text-base font-semibold flex items-center gap-1.5">
+                {t.name}
+                <ArrowUpRight className="size-3.5 text-muted-foreground opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+              </h3>
+              <p className="relative mt-1 text-sm text-muted-foreground">{t.desc}</p>
+            </Link>
+          </motion.div>
         ))}
       </div>
 
@@ -168,5 +199,6 @@ function ToolsIndex() {
         </div>
       )}
     </div>
+    </PageShell>
   );
 }
