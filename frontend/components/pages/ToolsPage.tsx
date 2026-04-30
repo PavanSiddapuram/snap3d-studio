@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { motion, LayoutGroup } from "framer-motion";
@@ -28,6 +29,7 @@ type Tool = {
   desc: string;
   category: string;
   icon: typeof Box;
+  img?: string;
   paid?: boolean;
   pick?: boolean;
   href: string;
@@ -37,17 +39,17 @@ type Tool = {
 const TOOLS: Tool[] = [
   { name: "Image to 3D",      desc: "Photo to textured 3D mesh",      icon: ImageIcon, category: "AI Generation", paid: true,                  href: "/generate/image",    hue: 277 },
   { name: "Text to 3D",       desc: "Describe and generate",           icon: Type,      category: "AI Generation", paid: true,                  href: "/generate/text",     hue: 250 },
-  { name: "Pet to 3D",        desc: "Turn your pet into a figurine",   icon: PawPrint,  category: "AI Generation", paid: true, pick: true,       href: "/generate/image",    hue: 200 },
-  { name: "Face to 3D",       desc: "Realistic 3D bust from a selfie", icon: User,      category: "AI Generation", paid: true,                  href: "/generate/image",    hue: 160 },
-  { name: "Lithophane",       desc: "Photo to printable lithophane",   icon: FileImage, category: "Generators",                                  href: "/tools/lithophane",  hue: 175 },
-  { name: "3D Text",          desc: "Custom 3D lettering",             icon: Type,      category: "Generators",                                  href: "/tools/lithophane",  hue: 300 },
+  { name: "Pet to 3D",        desc: "Turn your pet into a figurine",   icon: PawPrint,  img: "/assets/pet.png", category: "AI Generation", paid: true, pick: true,       href: "/generate/image",    hue: 200 },
+  { name: "Face to 3D",       desc: "Realistic 3D bust from a selfie", icon: User,      img: "/assets/bust.png", category: "AI Generation", paid: true,                  href: "/generate/image",    hue: 160 },
+  { name: "Lithophane",       desc: "Photo to printable lithophane",   icon: FileImage, img: "/assets/lithopane-maker.png", category: "Generators",                                  href: "/tools/lithophane",  hue: 175 },
+  { name: "3D Text",          desc: "Custom 3D lettering",             icon: Type,      img: "/assets/3d-text-tool.png", category: "Generators",                                  href: "/tools/lithophane",  hue: 300 },
   { name: "Name Sign",        desc: "Standing name signs",             icon: Tag,       category: "Generators",                                  href: "/tools/lithophane",  hue: 320 },
-  { name: "Name Plate",       desc: "Door and desk plates",            icon: Square,    category: "Generators",                                  href: "/tools/lithophane",  hue: 220 },
-  { name: "Vase",             desc: "Parametric vase generator",       icon: Box,       category: "Generators",                                  href: "/tools/lithophane",  hue: 180 },
-  { name: "Bin & Tray",       desc: "Custom storage bins",             icon: Trash2,    category: "Generators",                                  href: "/tools/lithophane",  hue: 260 },
+  { name: "Name Plate",       desc: "Door and desk plates",            icon: Square,    img: "/assets/name-plate.png", category: "Generators",                                  href: "/tools/lithophane",  hue: 220 },
+  { name: "Vase",             desc: "Parametric vase generator",       icon: Box,       img: "/assets/vase-maker.png", category: "Generators",                                  href: "/tools/lithophane",  hue: 180 },
+  { name: "Bin & Tray",       desc: "Custom storage bins",             icon: Trash2,    img: "/assets/bin-tray-generator.png", category: "Generators",                                  href: "/tools/lithophane",  hue: 260 },
   { name: "3D Viewer",        desc: "Inspect STL / GLB / OBJ",         icon: Eye,       category: "Utilities",                                   href: "/tools/lithophane",  hue: 240 },
   { name: "Format Converter", desc: "STL ⇄ GLB ⇄ OBJ",                icon: RefreshCw, category: "Utilities",                                   href: "/tools/lithophane",  hue: 290 },
-  { name: "G-code Viewer",    desc: "Inspect toolpaths",               icon: Code,      category: "Utilities",                                   href: "/tools/lithophane",  hue: 210 },
+  { name: "G-code Viewer",    desc: "Inspect toolpaths",               icon: Code,      img: "/assets/g-code-viewer.png", category: "Utilities",                                   href: "/tools/lithophane",  hue: 210 },
 ];
 
 const CATEGORIES = ["All", "AI Generation", "Generators", "Utilities"] as const;
@@ -184,17 +186,21 @@ function ToolCard({ tool: t }: { tool: Tool }) {
         <ArrowUpRight className="size-3.5 text-foreground" />
       </div>
 
-      {/* Centered icon */}
-      <div className="flex-1 flex items-center justify-center relative">
-        <div
-          className="size-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-          style={{ border: `1px solid oklch(0.55 0.18 ${t.hue} / 0.3)` }}
-        >
-          <t.icon
-            className="size-6"
-            style={{ color: `oklch(0.78 0.14 ${t.hue})` }}
-          />
-        </div>
+      {/* Centered icon or image */}
+      <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+        {t.img ? (
+          <Image src={t.img} alt={t.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 640px) 50vw, 25vw" />
+        ) : (
+          <div
+            className="size-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+            style={{ border: `1px solid oklch(0.55 0.18 ${t.hue} / 0.3)` }}
+          >
+            <t.icon
+              className="size-6"
+              style={{ color: `oklch(0.78 0.14 ${t.hue})` }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Bottom info */}

@@ -46,7 +46,7 @@ function Hero() {
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[120vh]"
         style={{
           background:
-            "radial-gradient(50% 40% at 50% 0%, oklch(0.55 0.22 277 / 0.18), transparent 70%)",
+            "radial-gradient(50% 40% at 50% 0%, oklch(0.85 0.15 250 / 0.3), transparent 70%)",
         }}
       />
 
@@ -135,15 +135,15 @@ function Hero() {
 }
 
 const HERO_TILES = [
-  { hue: 264, label: "Dragon",     sub: "Text-to-3D",    img: "https://picsum.photos/seed/sculpt3d/400/400" },
-  { hue: 200, label: "Lithophane", sub: "Photo tool",    img: "https://picsum.photos/seed/litho3d/400/400" },
-  { hue: 290, label: "Vase",       sub: "Generator",     img: "https://picsum.photos/seed/vase3dp/400/400" },
-  { hue: 220, label: "Pet",        sub: "Image-to-3D",   img: "https://picsum.photos/seed/pet3dprint/400/400" },
-  { hue: 277, label: "Featured",   sub: "Snap3D pick",   img: "https://picsum.photos/seed/snap3dfeat/400/400", featured: true },
-  { hue: 250, label: "Name Plate", sub: "Custom",        img: "https://picsum.photos/seed/nameplate3/400/400" },
-  { hue: 310, label: "Bust",       sub: "Face-to-3D",    img: "https://picsum.photos/seed/bust3dpr/400/400" },
-  { hue: 240, label: "House",      sub: "Architectural", img: "https://picsum.photos/seed/arch3dpr/400/400" },
-  { hue: 270, label: "Tag",        sub: "Personalised",  img: "https://picsum.photos/seed/tag3dprnt/400/400" },
+  { hue: 264, label: "Dragon",     sub: "Text-to-3D",    img: "/assets/dragon.png" },
+  { hue: 200, label: "Lithophane", sub: "Photo tool",    img: "/assets/lithopane.png" },
+  { hue: 290, label: "Vase",       sub: "Generator",     img: "/assets/vase.png" },
+  { hue: 220, label: "Pet",        sub: "Image-to-3D",   img: "/assets/pet.png" },
+  { hue: 277, label: "Featured",   sub: "Snap3D pick",   img: "/assets/featured.png", featured: true },
+  { hue: 250, label: "Name Plate", sub: "Custom",        img: "/assets/name-plate.png" },
+  { hue: 310, label: "Bust",       sub: "Face-to-3D",    img: "/assets/bust.png" },
+  { hue: 240, label: "House",      sub: "Architectural", img: "/assets/house.png" },
+  { hue: 270, label: "Tag",        sub: "Personalised",  img: "/assets/tag.png" },
 ];
 
 function HeroGrid() {
@@ -154,7 +154,7 @@ function HeroGrid() {
         className="pointer-events-none absolute inset-x-0 -top-10 bottom-0 -z-10"
         style={{
           background:
-            "radial-gradient(60% 60% at 50% 50%, oklch(0.55 0.22 277 / 0.10), transparent 70%)",
+            "radial-gradient(60% 60% at 50% 50%, oklch(0.90 0.10 270 / 0.5), transparent 70%)",
         }}
       />
       {/* perspective reduced on mobile so the tilt doesn't clip */}
@@ -171,40 +171,48 @@ function HeroGrid() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 + i * 0.04, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{ y: -5, scale: 1.02 }}
+              whileHover={{ y: -5, scale: 1.02, rotateX: 5, rotateY: -5 }}
               /* hide last 3 tiles on mobile — 6 tiles fill a 2-col grid cleanly */
               className={`group relative aspect-square rounded-xl sm:rounded-2xl border border-border-subtle bg-card overflow-hidden transition-shadow hover:shadow-[0_20px_60px_-20px_oklch(0.55_0.22_${t.hue}_/_0.4)] ${i >= 6 ? "hidden sm:block" : ""} ${t.featured ? "ring-conic" : ""}`}
             >
               {/* Photo layer — tinted by gradient overlay */}
-              <Image
-                src={t.img}
-                alt={t.label}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 50vw, 33vw"
-              />
-              {/* Dark gradient overlay — keeps brand colour & readability */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: `radial-gradient(circle at 50% 35%, oklch(0.55 0.22 ${t.hue} / 0.72), transparent 65%), linear-gradient(160deg, oklch(0.18 0.06 ${t.hue} / 0.88), oklch(0.10 0.02 280 / 0.75))`,
-                }}
-              />
-              <div className="absolute inset-0 grid-bg opacity-15" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.div
-                  className="size-1/2 rounded-full blur-2xl opacity-60"
+              {t.img ? (
+                <Image
+                  src={t.img}
+                  alt={t.label}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 50vw, 33vw"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-muted/20" />
+              )}
+              {/* Light gradient overlay — keeps brand colour & bright aesthetic */}
+              {!t.img && (
+                <div
+                  className="absolute inset-0"
                   style={{
-                    background: `radial-gradient(circle, oklch(0.78 0.22 ${t.hue}), transparent 70%)`,
+                    background: `radial-gradient(circle at 50% 35%, oklch(0.90 0.10 ${t.hue} / 0.4), transparent 65%), linear-gradient(160deg, oklch(0.98 0.02 ${t.hue} / 0.6), transparent)`,
                   }}
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 4 + i * 0.3, repeat: Infinity, ease: "easeInOut" }}
                 />
-                <Box
-                  className="absolute size-8 sm:size-10 lg:size-12 text-white/80 drop-shadow-[0_8px_20px_rgba(0,0,0,0.5)] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
-                  strokeWidth={1.2}
-                />
-              </div>
+              )}
+              <div className="absolute inset-0 grid-bg opacity-15" />
+              {!t.img && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.div
+                    className="size-1/2 rounded-full blur-2xl opacity-60"
+                    style={{
+                      background: `radial-gradient(circle, oklch(0.78 0.22 ${t.hue}), transparent 70%)`,
+                    }}
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 4 + i * 0.3, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <Box
+                    className="absolute size-8 sm:size-10 lg:size-12 text-foreground/70 drop-shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
+                    strokeWidth={1.2}
+                  />
+                </div>
+              )}
               <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5">
                 {t.featured && (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] uppercase tracking-wider rounded-full bg-foreground/90 text-background font-semibold">
@@ -212,7 +220,7 @@ function HeroGrid() {
                   </span>
                 )}
               </div>
-              <div className="absolute bottom-0 inset-x-0 px-2.5 py-2 sm:px-3 sm:py-2.5 bg-linear-to-t from-background/95 via-background/60 to-transparent">
+              <div className="absolute bottom-0 inset-x-0 px-2.5 py-2 sm:px-3 sm:py-2.5 bg-linear-to-t from-background/90 via-background/50 to-transparent">
                 <div className="text-[10px] sm:text-[11px] font-medium text-foreground truncate">{t.label}</div>
                 <div className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{t.sub}</div>
               </div>
@@ -286,10 +294,10 @@ function Features() {
           </div>
           <div aria-hidden className="absolute right-0 bottom-0 w-1/2 h-full pointer-events-none">
             <div
-              className="absolute inset-0 opacity-90"
+              className="absolute inset-0 opacity-60"
               style={{
                 background:
-                  "radial-gradient(60% 60% at 70% 60%, oklch(0.6 0.22 277 / 0.45), transparent 65%)",
+                  "radial-gradient(60% 60% at 70% 60%, oklch(0.85 0.15 277 / 0.6), transparent 65%)",
               }}
             />
             <Box
@@ -373,9 +381,9 @@ function BentoCard({
     >
       <div
         aria-hidden
-        className="absolute inset-0 opacity-60 pointer-events-none"
+        className="absolute inset-0 opacity-40 pointer-events-none"
         style={{
-          background: `radial-gradient(120% 80% at 0% 0%, oklch(0.55 0.22 ${hue} / 0.12), transparent 60%)`,
+          background: `radial-gradient(120% 80% at 0% 0%, oklch(0.85 0.15 ${hue} / 0.4), transparent 60%)`,
         }}
       />
       {children}
@@ -402,7 +410,7 @@ function Showcase() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(60% 60% at 80% 0%, oklch(0.55 0.22 277 / 0.18), transparent 60%), radial-gradient(50% 60% at 0% 100%, oklch(0.55 0.22 250 / 0.14), transparent 65%)",
+              "radial-gradient(60% 60% at 80% 0%, oklch(0.85 0.15 277 / 0.4), transparent 60%), radial-gradient(50% 60% at 0% 100%, oklch(0.80 0.15 250 / 0.3), transparent 65%)",
           }}
         />
         <div className="grid gap-10 lg:grid-cols-2 p-8 lg:p-14">
@@ -436,10 +444,10 @@ function Showcase() {
                 className="size-48 transform-3d"
                 style={{
                   background:
-                    "radial-gradient(circle at 30% 30%, oklch(0.7 0.22 277), oklch(0.4 0.22 290) 60%, oklch(0.2 0.05 280))",
+                    "radial-gradient(circle at 30% 30%, oklch(0.9 0.15 277), oklch(0.8 0.15 290) 60%, oklch(0.95 0.05 280))",
                   borderRadius: "30%",
                   boxShadow:
-                    "0 30px 80px -20px oklch(0.55 0.22 277 / 0.5), inset -20px -30px 60px oklch(0.13 0.02 280 / 0.6)",
+                    "0 30px 80px -20px oklch(0.7 0.15 277 / 0.3), inset -20px -30px 60px oklch(0.9 0.05 280 / 0.6)",
                 }}
               />
             </div>
@@ -457,11 +465,11 @@ function Showcase() {
 
 function ToolsStrip() {
   const tools = [
-    { name: "Lithophane",       icon: FileImage, desc: "Photo to printable lithophane" },
-    { name: "3D Text",          icon: Type,      desc: "Custom 3D lettering" },
-    { name: "Vase Maker",       icon: Box,       desc: "Parametric vases" },
-    { name: "Bin & Tray",       icon: Trash2,    desc: "Custom storage bins" },
-    { name: "G-code Viewer",    icon: Wrench,    desc: "Inspect toolpaths" },
+    { name: "Lithophane",       icon: FileImage, img: "/assets/lithopane-maker.png", desc: "Photo to printable lithophane" },
+    { name: "3D Text",          icon: Type,      img: "/assets/3d-text-tool.png", desc: "Custom 3D lettering" },
+    { name: "Vase Maker",       icon: Box,       img: "/assets/vase-maker.png", desc: "Parametric vases" },
+    { name: "Bin & Tray",       icon: Trash2,    img: "/assets/bin-tray-generator.png", desc: "Custom storage bins" },
+    { name: "G-code Viewer",    icon: Wrench,    img: "/assets/g-code-viewer.png", desc: "Inspect toolpaths" },
     { name: "Format Converter", icon: Sparkles,  desc: "STL ⇄ GLB ⇄ OBJ" },
   ];
   return (
@@ -487,11 +495,15 @@ function ToolsStrip() {
               href="/tools"
               className="group rounded-2xl border border-border-subtle bg-card p-4 hover:border-accent/40 transition-all hover:-translate-y-0.5"
             >
-              <div className="aspect-video rounded-lg bg-elevated border border-border-subtle relative overflow-hidden">
+              <div className="aspect-video rounded-lg bg-elevated border border-border-subtle relative overflow-hidden group-hover:border-accent/30 transition-all">
                 <div className="absolute inset-0 grid-bg opacity-50" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <t.icon className="size-7 text-muted-foreground group-hover:text-accent group-hover:scale-110 transition-all duration-300" />
-                </div>
+                {t.img ? (
+                  <Image src={t.img} alt={t.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 640px) 50vw, 16vw" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <t.icon className="size-7 text-muted-foreground group-hover:text-accent group-hover:scale-110 transition-all duration-300" />
+                  </div>
+                )}
               </div>
               <h4 className="mt-3 text-sm font-medium">{t.name}</h4>
               <p className="text-xs text-muted-foreground">{t.desc}</p>
