@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Coins, Maximize2, Orbit, RotateCcw, Download,
@@ -12,23 +12,25 @@ import {
 import { toast } from "sonner";
 import { UploadZone } from "@/components/UploadZone";
 import { cn } from "@/lib/utils";
+import { submitGenerate, type JobAssets } from "@/lib/api";
+import { useJobProgress } from "@/hooks/use-job-progress";
 
 const ModelViewer = dynamic(() => import("@/components/ModelViewer"), { ssr: false });
 
-type Status = "idle" | "loading" | "complete";
+type PageStatus = "idle" | "loading" | "complete";
 
-const STAGES = [
-  { label: "Analyzing image" },
-  { label: "Generating mesh" },
-  { label: "Applying textures" },
-  { label: "Finalizing" },
+const BACKEND_STAGES = [
+  { key: "Starting",            label: "Analyzing image" },
+  { key: "Removing background", label: "Removing background" },
+  { key: "Generating 3D model", label: "Generating 3D mesh" },
+  { key: "Uploading assets",    label: "Finalizing" },
 ];
 
 const SAMPLES = [
   { id: "s1", label: "Sneaker", url: "https://picsum.photos/seed/sneaker2025/300/300" },
   { id: "s2", label: "Ceramic", url: "https://picsum.photos/seed/ceramic2025/300/300" },
   { id: "s3", label: "Figurine", url: "https://picsum.photos/seed/figur2025/300/300" },
-  { id: "s4", label: "Plant", url: "https://picsum.photos/seed/plant2025/300/300" },
+  { id: "s4", label: "Plant",   url: "https://picsum.photos/seed/plant2025/300/300" },
 ];
 
 export function ImageGeneratePage() {
@@ -38,8 +40,31 @@ export function ImageGeneratePage() {
   const [resolution, setResolution] = useState<"512" | "1024">("512");
   const [detail, setDetail] = useState<"Low" | "Medium" | "High">("Medium");
   const [bgRemove, setBgRemove] = useState(true);
-  const [status, setStatus] = useState<Status>("idle");
-  const [stageIdx, setStageIdx] = useState(0);
+  const [status, setStatus] = useState<PageStatus>("idle");
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [assets, setAssets] = useState<JobAssets | null>(null);
+  const [meshInfo, setMeshInfo] = useState<{ vertices: number; faces: number } | null>(null);
+
+  const { progress, status: jobStatus, stage } = useJobProgress(jobId);
+
+  // Derive stage index from the backend's reported stage string
+  const stageIdx = Math.max(
+    0,
+    BACKEND_STAGES.findIndex((s) => s.key === stage),
+  );
+
+  // React to job completion / failure
+  useEffect(() => {
+    if (!jobId) return;
+    if (jobStatus === "complete") {
+      setStatus("complete");
+      toast.success("Model ready!");
+    } else if (jobStatus === "failed") {
+      setStatus("idle");
+      setJobId(null);
+      toast.error("Generation failed — please try again");
+    }
+  }, [jobStatus, jobId]);
 
   const hasInput = file !== null || sampleUrl !== null;
 
@@ -54,21 +79,34 @@ export function ImageGeneratePage() {
     setFile(null);
   }, []);
 
-  const generate = () => {
+  const generate = async () => {
     if (!hasInput) { toast.error("Upload a photo or pick a sample first"); return; }
     setStatus("loading");
-    setStageIdx(0);
-    let i = 0;
-    const t = setInterval(() => {
-      i += 1;
-      if (i >= STAGES.length) {
-        clearInterval(t);
-        setStatus("complete");
-        toast.success("Model ready!");
-        return;
+    setJobId(null);
+    setAssets(null);
+    setMeshInfo(null);
+
+    try {
+      const fd = new FormData();
+      fd.append("job_type", "image_to_3d");
+      fd.append("resolution", resolution);
+      fd.append("poly_budget", detail.toLowerCase() as string);
+
+      if (file) {
+        fd.append("image", file);
+      } else if (sampleUrl) {
+        // Fetch the sample image and attach it as a blob
+        const resp = await fetch(sampleUrl);
+        const blob = await resp.blob();
+        fd.append("image", blob, "sample.jpg");
       }
-      setStageIdx(i);
-    }, 1500);
+
+      const queued = await submitGenerate(fd);
+      setJobId(queued.job_id);
+    } catch (err) {
+      setStatus("idle");
+      toast.error((err as Error).message ?? "Failed to submit — is the backend running?");
+    }
   };
 
   return (
@@ -276,12 +314,12 @@ export function ImageGeneratePage() {
                 <Spinner />
 
                 <div className="w-full max-w-xs space-y-1.5">
-                  {STAGES.map((stage, i) => {
+                  {BACKEND_STAGES.map((s, i) => {
                     const done = i < stageIdx;
                     const active = i === stageIdx;
                     return (
                       <motion.div
-                        key={stage.label}
+                        key={s.key}
                         initial={{ opacity: 0, x: -6 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.07 }}
@@ -309,7 +347,7 @@ export function ImageGeneratePage() {
                             active ? "text-foreground font-medium" : "text-muted-foreground",
                           )}
                         >
-                          {stage.label}
+                          {s.label}
                         </span>
                         {active && (
                           <motion.span
@@ -325,13 +363,13 @@ export function ImageGeneratePage() {
                   })}
                 </div>
 
-                {/* Progress bar */}
+                {/* Progress bar driven by real SSE progress (0–100) */}
                 <div className="absolute bottom-0 inset-x-0 h-0.5 bg-elevated overflow-hidden">
                   <motion.div
                     className="h-full bg-accent"
                     initial={{ width: "0%" }}
-                    animate={{ width: `${((stageIdx + 1) / STAGES.length) * 100}%` }}
-                    transition={{ duration: 1.3, ease: "easeOut" }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
                   />
                 </div>
               </motion.div>
@@ -359,7 +397,9 @@ export function ImageGeneratePage() {
                 {/* Mesh badge */}
                 <div className="absolute top-3 left-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/70 backdrop-blur border border-border-subtle text-[11px] text-muted-foreground">
                   <span className="size-1.5 rounded-full bg-success" />
-                  482K verts · PBR textured
+                  {meshInfo
+                    ? `${(meshInfo.vertices / 1000).toFixed(0)}K verts · PBR textured`
+                    : "PBR textured"}
                 </div>
 
                 {/* Viewer controls */}
@@ -377,19 +417,26 @@ export function ImageGeneratePage() {
 
                 {/* Download + share */}
                 <div className="absolute bottom-3 inset-x-3 flex items-center gap-2">
-                  {(["GLB", "STL", "OBJ"] as const).map((fmt) => (
-                    <button
+                  {([
+                    { fmt: "GLB", url: assets?.glb },
+                    { fmt: "STL", url: assets?.stl },
+                  ] as const).map(({ fmt, url }) => (
+                    <a
                       key={fmt}
-                      type="button"
-                      onClick={() => toast.success(`${fmt} download started`)}
+                      href={url ?? "#"}
+                      download={url ? `model.${fmt.toLowerCase()}` : undefined}
+                      onClick={!url ? (e) => { e.preventDefault(); toast.success(`${fmt} download started`); } : undefined}
                       className="flex-1 h-9 rounded-full bg-background/80 backdrop-blur border border-border text-xs font-medium hover:bg-elevated transition-colors inline-flex items-center justify-center gap-1.5"
                     >
                       <Download className="size-3.5" /> {fmt}
-                    </button>
+                    </a>
                   ))}
                   <button
                     type="button"
-                    onClick={() => toast.success("Link copied!")}
+                    onClick={() => {
+                      const shareUrl = assets?.glb ?? window.location.href;
+                      navigator.clipboard.writeText(shareUrl).then(() => toast.success("Link copied!"));
+                    }}
                     className="size-9 rounded-full bg-background/80 backdrop-blur border border-border hover:bg-elevated transition-colors flex items-center justify-center"
                     aria-label="Share"
                   >

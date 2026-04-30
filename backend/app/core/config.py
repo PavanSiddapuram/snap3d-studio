@@ -37,5 +37,9 @@ class Settings(BaseSettings):
     # Auth
     jwt_secret: str
 
+    # Public API base URL (used to build poll_url / stream_url in responses)
+    api_base_url: str = "https://api.snap3d.io"
+
 
 settings = Settings()
+    
